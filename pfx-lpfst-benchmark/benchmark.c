@@ -97,14 +97,13 @@ void fill_pfx_table(struct pfx_table* pfxt){
     unsigned int pref_len;
     unsigned int asn;
     unsigned int count = 0;
-    pfx_record rec;
+    struct pfx_record rec;
     while (fscanf(df, "%s %u %u", ip, &pref_len, &asn) != EOF){
         rec.max_len = pref_len;
         rec.min_len = pref_len;
         rec.asn = asn;
-        rec.socket_id = 990;
         printf("%u: IP: %s/%u %u\n", count, ip, pref_len, asn);
-        ip_version ver;
+        enum ip_version ver;
         if (strchr("ip", ':') == NULL)
             ver = IPV6;
         else
@@ -121,7 +120,7 @@ void fill_pfx_table(struct pfx_table* pfxt){
         ip_addr_to_str(&(rec.prefix), tmp, sizeof(tmp));
         //printf("IP: %s/%u-%u %u\n", t, rec.min_len, rec.max_len,rec.asn);
 
-        pfxv_state state;
+        enum pfxv_state state;
         pfx_table_validate(pfxt, rec.asn, &(rec.prefix), rec.min_len, &state);
        if(state != BGP_PFXV_STATE_VALID){
            printf("Error added pfx_record couldnt be validated as valid\n");
@@ -137,43 +136,41 @@ int main()
 {
     signal(SIGINT, &sig_handler);
 
-    tr_tcp_config tcp_config = {
-        "rpki.realmv6.org",          //IP
-        "42420"                      //Port
-    };
-    tr_socket tr_tcp;
-    tr_tcp_init(&tcp_config, &tr_tcp);
-    rtr_socket rtr_tcp;
-    rtr_tcp.tr_socket = &tr_tcp;
+//    struct tr_tcp_config tcp_config = {
+//        "rpki.realmv6.org",          //IP
+//        "42420"                      //Port
+//    };
+//    struct tr_socket tr_tcp;
+//    tr_tcp_init(&tcp_config, &tr_tcp);
+//    struct rtr_socket rtr_tcp;
+//    rtr_tcp.tr_socket = &tr_tcp;
 
-    tr_tcp_config tcp1_config = {
-        "rpki.realmv6.org",          //IP
+    struct tr_tcp_config tcp1_config = {
+        "rpki-validator.realmv6.org",          //IP
         "8282"                      //Port
     };
-    tr_socket tr_tcp1;
+    struct tr_socket tr_tcp1;
     tr_tcp_init(&tcp1_config, &tr_tcp1);
-    rtr_socket rtr_tcp1;
+    struct rtr_socket rtr_tcp1;
     rtr_tcp1.tr_socket = &tr_tcp1;
 
-    rtr_mgr_group groups[2];
+    struct rtr_mgr_group groups[2];
     groups[0].sockets_len = 1;
-    groups[0].sockets = malloc(1 * sizeof(rtr_socket*));
-    groups[0].sockets[0] = &rtr_tcp;
+    groups[0].sockets = malloc(1 * sizeof(struct rtr_socket*));
+    groups[0].sockets[0] = &rtr_tcp1;
     groups[0].preference = 1;
-    groups[1].sockets_len = 1;
-    groups[1].sockets = malloc(1 * sizeof(rtr_socket*));
-    groups[1].sockets[0] = &rtr_tcp1;
-    groups[1].preference = 2;
+//    groups[1].sockets_len = 1;
+//    groups[1].sockets = malloc(1 * sizeof(struct rtr_socket*));
+//    groups[1].sockets[0] = &rtr_tcp1;
+//    groups[1].preference = 2;
 
-    rtr_mgr_config conf;
-    conf.groups = groups;
-    conf.len = 2;
+    struct rtr_mgr_config* conf;
 
-    rtr_mgr_init(&conf, 240, 520, NULL);
-    rtr_mgr_start(&conf);
+    conf = rtr_mgr_init(groups, 1, 240, 520, NULL, NULL, NULL, NULL);
+    rtr_mgr_start(conf);
 
     //fill_pfx_table(groups[1].sockets[0]->pfx_table);
-    while(!rtr_mgr_conf_in_sync(&conf)){
+    while(!rtr_mgr_conf_in_sync(conf)){
         sleep(1);
     }
 
@@ -181,8 +178,8 @@ int main()
     unsigned int asn;
     char prefix[256] = "";
     unsigned int prefix_len;
-    ip_addr ip_addr;
-    pfxv_state state;
+    struct ip_addr ip_addr;
+    enum pfxv_state state;
     char tmp[100];
     time_t t = time(NULL);
     struct tm* tm = localtime(&t);
@@ -214,7 +211,7 @@ int main()
     printf("Benchmark started\n");
     char as_path[1024];
 
-    pfx_record* reason = NULL;
+    struct pfx_record* reason = NULL;
     unsigned int reason_len = 0;
 
     while(true){
@@ -223,7 +220,7 @@ int main()
         if(ip_str_to_addr(prefix, &ip_addr) == -1){ fprintf(stderr, "ERROR STR TO IPADDR\n");
             exit(EXIT_FAILURE);
         }
-        if(pfx_table_validate_r(conf.groups[0].sockets[0]->pfx_table, &reason, &reason_len, asn, &ip_addr, prefix_len, &state) == -1){
+        if(pfx_table_validate_r(conf->groups[0].sockets[0]->pfx_table, &reason, &reason_len, asn, &ip_addr, prefix_len, &state) == -1){
             fprintf(stderr, "VALIDATE ERROR\n");
             exit(EXIT_FAILURE);
         }
