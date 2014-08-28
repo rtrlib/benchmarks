@@ -1,8 +1,13 @@
 project(rtrlib-benchmark)
 cmake_minimum_required(VERSION 2.6)
 
-include_directories(/usr/local/include/)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99 -Wall -Wextra -Wformat-security -Wmissing-prototypes -Wmissing-declarations -Winit-self -Waggregate-return -Wmissing-format-attribute -Wundef -Wbad-function-cast -Wwrite-strings -Wformat=2")
+
+include_directories(.)
+include_directories(/home/nils/git/rtrlib)
+
+find_library(RTR_LIB rtr PATHS /home/nils/git/rtrlib)
 find_package(Threads REQUIRED)
-find_library(RT_LIB rtr PATHS /usr/local/lib64)
 
 ADD_SUBDIRECTORY(pfx-lpfst-benchmark)
+ADD_SUBDIRECTORY(spki-benchmark)

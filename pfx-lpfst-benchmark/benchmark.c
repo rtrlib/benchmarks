@@ -23,7 +23,6 @@ unsigned long int not_found_state = 0;
 void sig_handler(){
     fprintf(stderr, "FLUSHING\n");
     fflush(NULL);
-
 }
 
 void read_announcement(unsigned int* asn, char* prefix, unsigned int* prefix_len, char* as_path){
