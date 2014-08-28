@@ -75,19 +75,17 @@ void fill_router_key_table(struct spki_table* spki_table, struct spki_record **r
 
 int main(int argc, char* argv[])
 {
-    if(argc != 2){
+    if(argc != 3){
         printf("Usage:\n");
-        printf("%s <num_of_records_to_create>\n", argv[0]);
+        printf("%s <num_of_records_to_create> <num_of_passes>\n", argv[0]);
         exit(EXIT_SUCCESS);
     }
 
     unsigned int num_of_records_to_create = atoi(argv[1]);
+    unsigned int passes = atoi(argv[2]);
 
     struct spki_record* records;
     generate_spki_records(&records, num_of_records_to_create);
-
-    struct spki_table spkit;
-    spki_table_init(&spkit, NULL);
 
 
     const pid_t pid = getpid();
@@ -98,29 +96,44 @@ int main(int argc, char* argv[])
 
     printf("Adding records to spki_table...\n");
 
-    if(get_usage(pid, &start_cpu) == -1){
-        fprintf(stderr, "GET USAGE ERROR\n");
-        exit(EXIT_FAILURE);
+    unsigned int average_usecs = 0;
+    for(unsigned int i = 0; i < passes; i++){
+        struct spki_table spkit;
+        spki_table_init(&spkit, NULL);
+
+        printf("Pass %u\n", i);
+
+        if(get_usage(pid, &start_cpu) == -1){
+            fprintf(stderr, "GET USAGE ERROR\n");
+            free(records);
+            spki_table_free(&spkit);
+            exit(EXIT_FAILURE);
+        }
+        struct timeval stime;
+        gettimeofday(&stime, NULL);
+
+        fill_router_key_table(&spkit, &records, num_of_records_to_create);
+
+        struct timeval etime;
+        gettimeofday(&etime, NULL);
+        if(get_usage(pid, &end_cpu) == -1){
+            fprintf(stderr, "GET USAGE ERROR\n");
+            free(records);
+            spki_table_free(&spkit);
+            exit(EXIT_FAILURE);
+        }
+
+        calc_cpu_usage(&end_cpu, &start_cpu, &ucpu_usage, &scpu_usage);
+        printf("cpu ticks: %lu\n", ucpu_usage + scpu_usage);
+        printf("usecs: %u\n\n", get_timediff(stime, etime));
+        average_usecs += get_timediff(stime, etime);
+        spki_table_free(&spkit);
     }
-    struct timeval stime;
-    gettimeofday(&stime, NULL);
 
-    fill_router_key_table(&spkit, &records, num_of_records_to_create);
+    printf("Average usecs\n%u µs\n", average_usecs/passes);
 
-    struct timeval etime;
-    gettimeofday(&etime, NULL);
-    if(get_usage(pid, &end_cpu) == -1){
-        fprintf(stderr, "GET USAGE ERROR\n");
-    }
-    printf("Done\n\n");
-
-    calc_cpu_usage(&end_cpu, &start_cpu, &ucpu_usage, &scpu_usage);
-    printf("cpu ticks: %lu\n", ucpu_usage + scpu_usage);
-    printf("usecs: %u\n", get_timediff(stime, etime));
 
     free(records);
-    spki_table_free(&spkit);
-
 
     return 0;
 }

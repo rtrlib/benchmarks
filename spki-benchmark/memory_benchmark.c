@@ -65,56 +65,65 @@ void generate_spki_records(struct spki_record **records, unsigned int num_of_rec
 
 int main(int argc, char* argv[])
 {
-    if(argc != 2){
+    if(argc != 3){
         printf("Usage:\n");
-        printf("%s <num_of_records_to_create>\n", argv[0]);
+        printf("%s <num_of_records_to_create> <num_of_passes>\n", argv[0]);
         exit(EXIT_SUCCESS);
     }
 
     unsigned int num_of_records_to_create = atoi(argv[1]);
+    unsigned int passes = atoi(argv[2]);
 
     struct spki_record* records;
     generate_spki_records(&records, num_of_records_to_create);
-
-    struct spki_table spkit;
-    spki_table_init(&spkit, NULL);
-
 
     const pid_t pid = getpid();
     struct pstat start;
     struct pstat end;
     printf("Adding records to spki_table...\n");
 
-    if(get_usage(pid, &start) == -1){
-        fprintf(stderr, "GET USAGE ERROR\n");
-        free(records);
-        spki_table_free(&spkit);
-        exit(EXIT_FAILURE);
-    }
 
+    unsigned int average_rss = 0;
+    for(unsigned int i = 0; i < passes; i++){
+        struct spki_table spkit;
+        spki_table_init(&spkit, NULL);
 
-    for(unsigned int i = 0; i < num_of_records_to_create; i++){
-        if(spki_table_add_entry(&spkit, &records[i]) == SPKI_ERROR){
-            printf("Error while adding record %u\n", i);
+        printf("Pass %u\n", i);
+
+        if(get_usage(pid, &start) == -1){
+            fprintf(stderr, "GET USAGE ERROR\n");
             free(records);
             spki_table_free(&spkit);
             exit(EXIT_FAILURE);
         }
-    }
 
-    if(get_usage(pid, &end) == -1){
-        fprintf(stderr, "GET USAGE ERROR\n");
-        free(records);
+
+        for(unsigned int i = 0; i < num_of_records_to_create; i++){
+            if(spki_table_add_entry(&spkit, &records[i]) == SPKI_ERROR){
+                printf("Error while adding record %u\n", i);
+                free(records);
+                spki_table_free(&spkit);
+                exit(EXIT_FAILURE);
+            }
+        }
+
+        if(get_usage(pid, &end) == -1){
+            fprintf(stderr, "GET USAGE ERROR\n");
+            free(records);
+            spki_table_free(&spkit);
+            exit(EXIT_FAILURE);
+        }
+        printf("RSS %u byte\n", end.rss-start.rss);
+        printf("RSS %u MB\n\n", (end.rss-start.rss)/1024/1024);
+        average_rss += (end.rss-start.rss);
+
         spki_table_free(&spkit);
-        exit(EXIT_FAILURE);
     }
-    printf("RSS %u byte\n", end.rss-start.rss);
-    printf("RSS %u MB\n", (end.rss-start.rss)/1024/1024);
 
-    printf("Done\n\n");
+    printf("Average RSS\n%u Byte\n%u MB\n", average_rss, average_rss/(1024*1024)/passes);
 
     free(records);
-    spki_table_free(&spkit);
+
 
 
     return 0;
