@@ -39,8 +39,8 @@ void sig_handler(){
 }
 
 void generate_spki_records(struct spki_record **records, unsigned int num_of_records){
-    (*records) = malloc((num_of_records) * sizeof(struct spki_record));
-    if((*records) == NULL){
+    *records = malloc(num_of_records * sizeof(**records));
+    if(*records == NULL){
         printf("malloc error\n");
         exit(EXIT_FAILURE);
     }
