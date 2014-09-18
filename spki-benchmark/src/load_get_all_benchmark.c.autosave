@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
         printf("Adding records to spki_table...\n");
         fill_router_key_table(&spkit, &records, num_of_records_to_create);
 
-        printf("Pass %u\n", i);
+        printf("Start measurement... Pass %u\n", i);
 
         if(get_usage(pid, &start_cpu) == -1){
             fprintf(stderr, "GET USAGE ERROR\n");

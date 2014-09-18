@@ -10,7 +10,6 @@
 #include <sys/time.h>
 
 
-
 static struct spki_record* create_record(int ASN, int ski_offset, int spki_offset, struct rtr_socket *socket) {
     struct spki_record *record = malloc(sizeof(struct spki_record));
     record->asn = ASN;
@@ -40,13 +39,16 @@ void sig_handler(){
 }
 
 void generate_spki_records(struct spki_record **records, unsigned int num_of_records){
-    *records = malloc(num_of_records * sizeof(struct spki_record));
+    *records = malloc(num_of_records * sizeof(**records));
     if(*records == NULL){
         printf("malloc error\n");
         exit(EXIT_FAILURE);
     }
 
+    printf("\nGenerating %i spki_records...\n", num_of_records);
+
     srand (time(NULL));
+
     //Create i SPKI records with different ASN but sometimes same SKI/SPKI
     for(unsigned int i = 0; i < num_of_records; i++){
         int ski = rand() % (num_of_records/2);
@@ -56,6 +58,18 @@ void generate_spki_records(struct spki_record **records, unsigned int num_of_rec
 
         memcpy(&(*records)[i], record, sizeof(struct spki_record));
         free(record);
+    }
+    printf("Done");
+    printf("\n\n");
+}
+
+void fill_router_key_table(struct spki_table* spki_table, struct spki_record **records, unsigned int num_of_records){
+    for(unsigned int i = 0; i < num_of_records; i++){
+        if(spki_table_add_entry(spki_table, &(*records)[i]) == SPKI_ERROR){
+            free(*records);
+            printf("Faild to add record %u", i);
+            exit(EXIT_FAILURE);
+        }
     }
 }
 
@@ -70,49 +84,56 @@ int main(int argc, char* argv[])
     unsigned int num_of_records_to_create = atoi(argv[1]);
     unsigned int passes = atoi(argv[2]);
 
-    const pid_t pid = getpid();
-    struct pstat start;
-    struct pstat end;
-
     struct spki_record* records;
+    generate_spki_records(&records, num_of_records_to_create);
 
-    unsigned int average_rss = 0;
+
+    const pid_t pid = getpid();
+    struct pstat start_cpu;
+    struct pstat end_cpu;
+    long unsigned int ucpu_usage;
+    long unsigned int scpu_usage;
+
+    printf("Adding records to spki_table...\n");
+
+    double average_usecs = 0;
     for(unsigned int i = 0; i < passes; i++){
         struct spki_table spkit;
         spki_table_init(&spkit, NULL);
-        generate_spki_records(&records, num_of_records_to_create);
 
         printf("Start measurement... Pass %u\n", i);
 
-        if(get_usage(pid, &start) == -1){
+        if(get_usage(pid, &start_cpu) == -1){
+            fprintf(stderr, "GET USAGE ERROR\n");
+            free(records);
+            spki_table_free(&spkit);
+            exit(EXIT_FAILURE);
+        }
+        struct timeval stime;
+        gettimeofday(&stime, NULL);
+
+        fill_router_key_table(&spkit, &records, num_of_records_to_create);
+
+        struct timeval etime;
+        gettimeofday(&etime, NULL);
+        if(get_usage(pid, &end_cpu) == -1){
             fprintf(stderr, "GET USAGE ERROR\n");
             free(records);
             spki_table_free(&spkit);
             exit(EXIT_FAILURE);
         }
 
-        for(unsigned int i = 0; i < num_of_records_to_create; i++){
-            if(spki_table_add_entry(&spkit, &records[i]) == SPKI_ERROR){
-                printf("Error while adding record %u\n", i);
-                free(records);
-                spki_table_free(&spkit);
-                exit(EXIT_FAILURE);
-            }
-        }
-
-        if(get_usage(pid, &end) == -1){
-            fprintf(stderr, "GET USAGE ERROR\n");
-            free(records);
-            spki_table_free(&spkit);
-            exit(EXIT_FAILURE);
-        }
-        printf("RSS %lu byte\n", end.rss-start.rss);
-        average_rss += (end.rss-start.rss);
-
+        calc_cpu_usage(&end_cpu, &start_cpu, &ucpu_usage, &scpu_usage);
+        printf("cpu ticks: %lu\n", ucpu_usage + scpu_usage);
+        printf("usecs: %u\n\n", get_timediff(stime, etime));
+        average_usecs += get_timediff(stime, etime);
         spki_table_free(&spkit);
     }
 
-    printf("\n\nAverage RSS\n%u Byte\n%u MiB\n", average_rss/passes, average_rss/(1024*1024)/passes);
+    printf("Average %.6f s\n", average_usecs/(double)passes/(1000.0*1000.0));
+
+
     free(records);
+
     return 0;
 }
