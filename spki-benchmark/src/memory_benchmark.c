@@ -5,9 +5,10 @@
 #include <netdb.h>
 #include "rtrlib/rtrlib.h"
 #include "rtrlib/spki/hashtable/ht-spkitable.h"
-#include "getusage.c"
+#include "util/getusage.c"
 #include <signal.h>
 #include <sys/time.h>
+
 
 
 static struct spki_record* create_record(int ASN, int ski_offset, int spki_offset, struct rtr_socket *socket) {
@@ -45,10 +46,7 @@ void generate_spki_records(struct spki_record **records, unsigned int num_of_rec
         exit(EXIT_FAILURE);
     }
 
-    printf("\nGenerating %i spki_records...\n", num_of_records);
-
     srand (time(NULL));
-
     //Create i SPKI records with different ASN but sometimes same SKI/SPKI
     for(unsigned int i = 0; i < num_of_records; i++){
         int ski = rand() % (num_of_records/2);
@@ -59,8 +57,6 @@ void generate_spki_records(struct spki_record **records, unsigned int num_of_rec
         memcpy(&(*records)[i], record, sizeof(struct spki_record));
         free(record);
     }
-    printf("Done");
-    printf("\n\n");
 }
 
 int main(int argc, char* argv[])
@@ -74,19 +70,17 @@ int main(int argc, char* argv[])
     unsigned int num_of_records_to_create = atoi(argv[1]);
     unsigned int passes = atoi(argv[2]);
 
-    struct spki_record* records;
-    generate_spki_records(&records, num_of_records_to_create);
-
     const pid_t pid = getpid();
     struct pstat start;
     struct pstat end;
-    printf("Adding records to spki_table...\n");
 
+    struct spki_record* records;
 
     unsigned int average_rss = 0;
     for(unsigned int i = 0; i < passes; i++){
         struct spki_table spkit;
         spki_table_init(&spkit, NULL);
+        generate_spki_records(&records, num_of_records_to_create);
 
         printf("Pass %u\n", i);
 
@@ -96,7 +90,6 @@ int main(int argc, char* argv[])
             spki_table_free(&spkit);
             exit(EXIT_FAILURE);
         }
-
 
         for(unsigned int i = 0; i < num_of_records_to_create; i++){
             if(spki_table_add_entry(&spkit, &records[i]) == SPKI_ERROR){
@@ -113,18 +106,13 @@ int main(int argc, char* argv[])
             spki_table_free(&spkit);
             exit(EXIT_FAILURE);
         }
-        printf("RSS %u byte\n", end.rss-start.rss);
-        printf("RSS %u MB\n\n", (end.rss-start.rss)/1024/1024);
+        printf("RSS %lu byte\n", end.rss-start.rss);
         average_rss += (end.rss-start.rss);
 
         spki_table_free(&spkit);
     }
 
-    printf("Average RSS\n%u Byte\n%u MB\n", average_rss, average_rss/(1024*1024)/passes);
-
+    printf("\n\nAverage RSS\n%u Byte\n%u MiB\n", average_rss/passes, average_rss/(1024*1024)/passes);
     free(records);
-
-
-
     return 0;
 }
