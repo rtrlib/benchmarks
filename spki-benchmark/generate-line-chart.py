@@ -19,8 +19,8 @@ def print_usage():
 	print("%s [<name> <file>] <output-file>\n" % (sys.argv[0]))
 	print("If you provide more then one file, the x and y axis names will be taken from the first file!")
 	print("The name argument is the name which will be used for the data set in the graph legend. (Use '' for no name)")
-	print("The data format will be determined by the file extension.")
-	print("	Supported formats: eps, pdf, pgf, png, ps, raw, rgba, svg, svgz.\n")
+	print("The output data format will be determined by the file extension.")
+	print("Supported formats: eps, pdf, pgf, png, ps, raw, rgba, svg, svgz.\n")
 
 	print("The data in the files must be in the following format:")
 	print("x-axis-name;y-axis-name")
@@ -64,4 +64,4 @@ plt.legend()
 #Save to file
 plt.savefig(sys.argv[len(sys.argv)-1], dpi=1000)
 
-plt.show()
+#plt.show()

@@ -26,7 +26,7 @@ for (( i = $start_value; i <= $stop_value; i=$[$i+$increment_value] )); do
 done
 
 #Generate graph
-./generate-graph.py "Data" $log_tmp_dir/log $benchmark_result_dir/Memory\ usage\ $stop_value\ records.pdf
+./generate-line-chart.py "Data" $log_tmp_dir/log $benchmark_result_dir/Memory\ usage\ $stop_value\ records.pdf
 echo ""
 echo "Memory benchmark result is in ${benchmark_result_dir}/"
 

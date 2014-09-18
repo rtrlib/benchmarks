@@ -26,7 +26,7 @@ for (( i = $start_value; i <= $stop_value; i=$[$i+$increment_value] )); do
 done
 
 #Generate graph
-./generate-graph.py "Data" $log_tmp_dir/log $benchmark_result_dir/Add\ entry\ benchmark\ -\ $stop_value\ records.pdf
+./generate-line-chart.py "Data" $log_tmp_dir/log $benchmark_result_dir/Add\ entry\ benchmark\ -\ $stop_value\ records.pdf
 
 
 rm -R $log_tmp_dir
