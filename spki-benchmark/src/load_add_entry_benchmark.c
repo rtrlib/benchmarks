@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
         struct spki_table spkit;
         spki_table_init(&spkit, NULL);
 
-        printf("Pass %u\n", i);
+        printf("Start measurement... Pass %u\n", i);
 
         if(get_usage(pid, &start_cpu) == -1){
             fprintf(stderr, "GET USAGE ERROR\n");
