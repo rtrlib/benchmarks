@@ -9,17 +9,21 @@
 #include <signal.h>
 #include <sys/time.h>
 
-static struct spki_record* create_record(int ASN, int ski_offset, int spki_offset, struct rtr_socket *socket) {
+struct spki_table spkit;
+
+static struct spki_record *create_record(int ASN, int ski_offset, int spki_offset, struct rtr_socket *socket) {
     struct spki_record *record = malloc(sizeof(struct spki_record));
+    memset(record, 0, sizeof(*record));
+
     record->asn = ASN;
     uint32_t i;
 
-    for(i = 0; i < sizeof(record->ski); i++){
-        record->ski[i] = i + ski_offset;
+    for(i = 0; i < sizeof(record->ski)/sizeof(u_int32_t); i++){
+        ((u_int32_t*)record->ski)[i] = i + ski_offset;
     }
 
-    for(i = 0; i < sizeof(record->spki); i++){
-        record->spki[i] = i + spki_offset;
+    for(i = 0; i < sizeof(record->spki)/sizeof(u_int32_t); i++){
+        ((u_int32_t*)record->spki)[i] = i + spki_offset;
     }
     record->socket = socket;
     return record;
@@ -37,54 +41,50 @@ void sig_handler(){
 
 }
 
-/**
- * @brief generate_spki_records
- * @param records
- * @param num_of_records
- * @param chance_same_asn Chance that two records get the same ASN.
- * @param chance_same_ski Chance that two records get the same SKI
- * @param chance_same_spki Chance that two records get the same SPKI
- */
-void generate_spki_records(struct spki_record **records, unsigned int num_of_records,
-                           unsigned int chance_duplicated_asn){
-    *records = malloc(num_of_records * sizeof(struct spki_record));
-    if(*records == NULL){
-        printf("malloc error\n");
-        exit(EXIT_FAILURE);
-    }
-
-    printf("\nGenerating %i spki_records...\n", num_of_records);
-    srand (time(NULL));
-
-    //Create i SPKI records with different ASN but sometimes same SKI/SPKI
-    for(unsigned int i = 0; i < num_of_records; i++){
-        int ski = rand() % (num_of_records/2);
-        int spki = rand() % (num_of_records/2);
-        struct rtr_socket* socket = (struct rtr_socket*) 0x13;
-        struct spki_record* record = create_record(i,ski, spki, socket);
-        memcpy(&((*records)[i]), record, sizeof(*record));
-        free(record);
-
-        //Generate duplicates
-        unsigned int last_asn = i;
-        while(rand() % 100 < chance_duplicated_asn && i+1 < num_of_records){
-            i++;
-            struct spki_record* record = create_record(last_asn,ski++, spki++, socket);
-            memcpy(&((*records)[i]), record, sizeof(*record));
-            free(record);
-        }
-    }
-    printf("Done");
-    printf("\n\n");
+void switch_records(struct spki_record* r1, struct spki_record* r2){
+    struct spki_record tmp_record;
+    memcpy(&tmp_record, r2, sizeof(tmp_record));
+    memcpy(r2, r1, sizeof(tmp_record));
+    memcpy(r1, r2, sizeof(tmp_record));
 }
 
-void fill_router_key_table(struct spki_table* spki_table, struct spki_record **records, unsigned int num_of_records){
-    for(unsigned int i = 0; i < num_of_records; i++){
-        if(spki_table_add_entry(spki_table, &(*records)[i]) == SPKI_ERROR){
-            free(*records);
-            printf("Faild to add record %u", i);
-            exit(EXIT_FAILURE);
+void generate_records(unsigned int number_of_records, unsigned int chance_duplicates,
+                      struct spki_record** records){
+    *records = malloc(number_of_records * sizeof(**records));
+    srand(time(NULL));
+    struct spki_record* record;
+    struct rtr_socket* socket = (struct rtr_socket*) 0x13;
+    unsigned int index = 0;
+    unsigned int same_asn = 0;
+    while(index < number_of_records){
+        unsigned int asn = index;
+        unsigned int ski = rand() % (number_of_records / 2);
+        unsigned int spki = rand() % (number_of_records / 2);
+
+        record = create_record(asn, ski, spki, socket);
+        //printf("ASN: %u, SKI:%u, SPKI:%u\n", asn, ski, spki);
+
+        assert(spki_table_add_entry(&spkit, record) == SPKI_SUCCESS);
+        memcpy(&(*records)[index], record, sizeof(*record));
+        free(record);
+        index++;
+        while((unsigned int)(rand() % 100) < chance_duplicates && index < number_of_records){
+            same_asn++;
+            record = create_record(asn, ++ski, ++spki, socket);
+            //printf("ASN: %u, SKI:%u, SPKI:%u\n", asn, ski, spki);
+            assert(spki_table_add_entry(&spkit, record) == SPKI_SUCCESS);
+            memcpy(&(*records)[index], record, sizeof(*record));
+            free(record);
+            index++;
         }
+    }
+    //Shuffel the records, else the caching will influence the result
+    srand(time(NULL));
+    for(unsigned int i = 0; i < number_of_records; i++){
+        unsigned int rand1 = rand()%number_of_records;
+        unsigned int rand2 = rand()%number_of_records;
+
+        switch_records(&(*records)[rand1], &(*records)[rand2]);
     }
 }
 
@@ -101,10 +101,6 @@ int main(int argc, char* argv[])
     unsigned int passes = atoi(argv[2]);
     double chance_duplicated_asn = atoi(argv[3]);
 
-    struct spki_record* records;
-    generate_spki_records(&records, num_of_records_to_create, chance_duplicated_asn);
-
-
     const pid_t pid = getpid();
     struct pstat start_cpu;
     struct pstat end_cpu;
@@ -113,11 +109,11 @@ int main(int argc, char* argv[])
 
     unsigned int average_usecs = 0;
     for(unsigned int i = 0; i < passes; i++){
-        struct spki_table spkit;
         spki_table_init(&spkit, NULL);
 
         printf("Adding records to spki_table...\n");
-        fill_router_key_table(&spkit, &records, num_of_records_to_create);
+        struct spki_record* records;
+        generate_records(num_of_records_to_create, chance_duplicated_asn, &records);
 
         printf("Start measurement... Pass %u\n", i);
 
@@ -139,6 +135,7 @@ int main(int argc, char* argv[])
                 free(records);
                 exit(EXIT_FAILURE);
             }
+            assert(result_size == 1);
             free(result);
         }
 
@@ -156,12 +153,8 @@ int main(int argc, char* argv[])
         printf("usecs: %u\n\n", get_timediff(stime, etime));
         average_usecs += get_timediff(stime, etime);
         spki_table_free(&spkit);
+        free(records);
     }
-
     printf("Average %.6f s\n", average_usecs/(double)passes/(1000.0*1000.0));
-
-
-    free(records);
-
     return 0;
 }
