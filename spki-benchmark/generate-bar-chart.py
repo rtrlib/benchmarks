@@ -56,7 +56,7 @@ while line != '':
     line = infile.readline()
 
 ind = np.arange(groupCount)      # the x locations for the groups
-width = 0.05                    # the width of the bars
+width = 0.1                    # the width of the bars
 
 # Draw the bars
 rects = []
@@ -74,5 +74,6 @@ xtickNames = ax.set_xticklabels(groupNames)
 ax.legend(rects, barNames, loc=2, fontsize="x-small")
 
 ax.grid()
-plt.savefig(sys.argv[len(sys.argv) - 1], dpi=1000)
+plt.margins(0.1)
+plt.savefig(sys.argv[len(sys.argv) - 1], dpi=1000, figsize=(2, 2))
 # plt.show()

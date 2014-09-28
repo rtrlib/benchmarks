@@ -61,7 +61,9 @@ while line != "":
     plt.plot(setx, sety, label=set_name)
     set_name = line = infile.readline()
 
+plt.margins(0.1)
 plt.grid()
 plt.legend()
-plt.savefig(sys.argv[len(sys.argv) - 1], dpi=1000)
+plt.savefig(sys.argv[len(sys.argv) - 1], dpi=1000, figsize=(2, 2))
+
 # plt.show()
