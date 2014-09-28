@@ -26,10 +26,9 @@ def print_usage():
 if len(sys.argv) != 4 or sys.argv[1] == '--help' or sys.argv[1] == '-h':
     print_usage()
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-
-    ax.set_title(sys.argv[1])
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.set_title(sys.argv[1])
 
 # Get axis captions
 infile = open(sys.argv[2], 'r')
