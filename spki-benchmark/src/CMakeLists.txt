@@ -10,7 +10,7 @@ target_link_libraries(memory_benchmark ${RTR_LIB} ${CMAKE_THREAD_LIBS_INIT})
 # Memory benchmark target
 add_custom_target(
 	run_spki_memory_benchmark
-	COMMAND cd .. && ./memory_benchmark_draw_graph.sh
+	COMMAND cd .. && ./memory_benchmark_draw_chart.sh
 	COMMENT "Measure the memory consumption"
 	DEPENDS memory_benchmark
 )
@@ -18,7 +18,7 @@ add_custom_target(
 # Load add_records benchmark target
 add_custom_target(
 	run_spki_load_add_entry_benchmark
-	COMMAND cd .. && ./load_add_records_benchmark_draw_graph.sh
+	COMMAND cd .. && ./load_add_records_benchmark_draw_chart.sh
 	COMMENT "Benchmark add_records"
 	DEPENDS load_add_entry_benchmark
 )
@@ -26,7 +26,13 @@ add_custom_target(
 # Load get_all target
 add_custom_target(
 	run_spki_load_get_all_benchmark
-	COMMAND cd .. && ./load_get_all_benchmark_draw_graph.sh
+	COMMAND cd .. && ./load_get_all_benchmark_draw_chart.sh
 	COMMENT "Benchmark get_all"
 	DEPENDS load_get_all_benchmark
+)
+
+# Run all SPKI benchmarks
+add_custom_target(
+	run_all_spki_benchmarks
+	DEPENDS run_spki_load_add_entry_benchmark run_spki_memory_benchmark run_spki_load_get_all_benchmark
 )
