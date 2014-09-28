@@ -35,7 +35,6 @@ unsigned int get_timediff(const struct timeval start,
 void sig_handler(){
     fprintf(stderr, "FLUSHING\n");
     fflush(NULL);
-
 }
 
 void generate_spki_records(struct spki_record **records, unsigned int num_of_records){
