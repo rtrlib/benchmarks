@@ -3,7 +3,8 @@
 # Written by Nils Bars
 # Programming language: python3
 # using matplotlib 1.4.0-2
-
+import matplotlib
+matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
 import numpy as np

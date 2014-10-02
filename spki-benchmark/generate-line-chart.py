@@ -3,6 +3,9 @@
 # Written by Nils Bars
 # Programming language: python3
 # using matplotlib 1.4.0-2
+import matplotlib
+matplotlib.use('Agg')
+
 import matplotlib.pyplot as plt
 import sys
 
@@ -47,6 +50,7 @@ plt.xlabel(line_components[0])
 plt.ylabel(line_components[1])
 
 set_name = line = infile.readline()
+minxval = None
 while line != "":
     setx = []
     sety = []
@@ -57,6 +61,12 @@ while line != "":
         line_components = line.strip().split(";")
         setx.append(float(line_components[0]))
         sety.append(float(line_components[1]))
+        if minxval is None or minxval > float(setx[0]):
+            minxval = float(setx[0])
+
+    plt.plot(setx, sety, label=set_name)
+    set_name = line = infile.readline()
+    plt.xlim(minxval)
 
     plt.plot(setx, sety, label=set_name)
     set_name = line = infile.readline()
@@ -65,5 +75,3 @@ plt.margins(0.1)
 plt.grid()
 plt.legend()
 plt.savefig(sys.argv[len(sys.argv) - 1], dpi=1000, figsize=(2, 2))
-
-# plt.show()
