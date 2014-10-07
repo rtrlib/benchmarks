@@ -29,7 +29,7 @@ inline unsigned int get_timediff(const struct timeval start,
 }
 
 struct val_pref{
-    ip_addr prefix;
+    struct ip_addr prefix;
     uint32_t asn;
     uint8_t mask_len;
 };
@@ -91,9 +91,9 @@ void read_prefixes(const char* filename, struct val_pref** recs, unsigned int*
 
 }
 
-void fill_pfx_table(pfx_table* pfxt, const char* filename){
+void fill_pfx_table(struct pfx_table* pfxt, const char* filename){
     unsigned int records_added = 0;
-    pfx_record rec;
+    struct pfx_record rec;
     char buf[100];
 
     printf("Loading ROAs from %s into pfx_table...\n", filename);
@@ -119,7 +119,7 @@ void fill_pfx_table(pfx_table* pfxt, const char* filename){
         }
 
         //validate added prefix to be sure that the pfx_table works correct
-        pfxv_state val_state;
+        enum pfxv_state val_state;
         if(pfx_table_validate(pfxt, rec.asn, &rec.prefix, rec.min_len, &val_state)
                 != PFX_SUCCESS){
             fprintf(stderr, "\npfx_table_validate unsucessfull");
@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
     strncpy(val_file, argv[3], sizeof(roa_file));
     strncpy(logfile_prefix, argv[4], sizeof(logfile_prefix));
 
-    pfx_table pfxt;
+    struct pfx_table pfxt;
     pfx_table_init(&pfxt, NULL);
     fill_pfx_table(&pfxt, roa_file);
 
@@ -196,7 +196,7 @@ int main(int argc, char* argv[])
         unsigned int invalid = 0;
         unsigned int not_found = 0;
         for(unsigned int j = 0; j < prefix_len ; j++){
-            pfxv_state val_state;
+            enum pfxv_state val_state;
             if (pfx_table_validate(&pfxt, prefixes[j].asn,
                         &(prefixes[j].prefix), prefixes[j].mask_len,
                         &val_state) == PFX_ERROR){

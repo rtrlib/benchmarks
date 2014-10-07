@@ -1,5 +1,6 @@
 #!/bin/bash
 
+mkdir -p logs
 count="1000 10000 100000 1000000 10000000"
 for ((i=0; i < 1000; i++)); do
     for j in $count; do
@@ -16,7 +17,7 @@ for ((i=0; i < 1000; i++)); do
         done
 
         echo "Generating $j IPv6 48-48 prefixes ($i/1000)"
-        python gen-prefixes6.py $j > roas
+        python gen-prefixes6.py $j 48 48 > roas
         for ((k=0; k < 10; k++)); do
         ./load_bench 1 roas |egrep "cpu|usecs" >> logs/load-bench6-$j-48-48.log
         done

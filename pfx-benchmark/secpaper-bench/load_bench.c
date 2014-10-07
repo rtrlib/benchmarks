@@ -86,11 +86,11 @@ void read_prefixes(const char* filename, struct pfx_record** recs, unsigned int*
 
 }
 
-void fill_pfx_table(pfx_table* pfxt, const struct pfx_record* prefixes,
+void fill_pfx_table(struct pfx_table* pfxt, const struct pfx_record* prefixes,
         const unsigned int prefix_len){
 
     for (unsigned int i = 0; i < prefix_len; i++) {
-        const pfx_record* rec = prefixes + i;
+        const struct pfx_record* rec = prefixes + i;
         if(pfx_table_add(pfxt, rec) == PFX_ERROR){
             fprintf(stderr, "\nError adding record %u to pfx_table", i);
             exit(EXIT_FAILURE);
@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
     struct pstat end_cpu;
     long unsigned int ucpu_usage;
     long unsigned int scpu_usage;
-    pfx_table pfxt;
+    struct pfx_table pfxt;
     pfx_table_init(&pfxt, NULL);
 
     printf("Adding records to pfx_table...\n");
