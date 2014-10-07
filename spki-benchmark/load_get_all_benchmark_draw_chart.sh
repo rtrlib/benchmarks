@@ -58,7 +58,7 @@ rm -rf $log_tmp_dir
 #Chart 2. - Line chart
 mkdir -p $log_tmp_dir
 
-echo "Number of added records;CPU time in s" > $log_tmp_dir/log
+echo "Number of lookups;CPU time in s" > $log_tmp_dir/log
 echo "Data" >> $log_tmp_dir/log
 
 #Run benchmark and save results
