@@ -9,5 +9,5 @@ include_directories(/home/nils/git/rtrlib)
 find_library(RTR_LIB rtr PATHS /home/nils/git/rtrlib)
 find_package(Threads REQUIRED)
 
-#ADD_SUBDIRECTORY(pfx-benchmark)
+ADD_SUBDIRECTORY(pfx-benchmark)
 ADD_SUBDIRECTORY(spki-benchmark)
