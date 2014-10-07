@@ -101,7 +101,7 @@ void fill_pfx_table(struct pfx_table* pfxt, const struct pfx_record* prefixes,
 int main(int argc, char* argv[])
 {
     char roa_file[200];
-    if(argc != 1){
+    if(argc != 2){
         printf("Usage:\n");
         printf("%s <roa-file>\n", argv[0]);
         exit(EXIT_FAILURE);
