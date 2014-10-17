@@ -48,42 +48,40 @@ void switch_records(struct spki_record* r1, struct spki_record* r2){
     memcpy(r1, r2, sizeof(tmp_record));
 }
 
-void generate_records(unsigned int number_of_records, unsigned int chance_duplicates,
+void generate_records(unsigned int number_of_records, unsigned int duplicates_quota_in_percent,
                       struct spki_record** records){
     *records = malloc(number_of_records * sizeof(**records));
     srand(time(NULL));
     struct spki_record* record;
     struct rtr_socket* socket = (struct rtr_socket*) 0x13;
-    unsigned int index = 0;
-    unsigned int same_asn = 0;
-    while(index < number_of_records){
-        unsigned int asn = index;
-        unsigned int ski = rand() % (number_of_records / 2);
-        unsigned int spki = rand() % (number_of_records / 2);
 
-        record = create_record(asn, ski, spki, socket);
-        //printf("ASN: %u, SKI:%u, SPKI:%u\n", asn, ski, spki);
+    unsigned int number_of_duplicats = (number_of_records * duplicates_quota_in_percent)/100;
+
+    //Generate (number_of_records-number_of_duplicats) records.
+    for(unsigned int i = 0; i < (number_of_records-number_of_duplicats); i++){
+        record = create_record(i, i, i, socket);
 
         assert(spki_table_add_entry(&spkit, record) == SPKI_SUCCESS);
-        memcpy(&(*records)[index], record, sizeof(*record));
+        memcpy(&(*records)[i], record, sizeof(*record));
         free(record);
-        index++;
-        while((unsigned int)(rand() % 100) < chance_duplicates && index < number_of_records){
-            same_asn++;
-            record = create_record(asn, ++ski, ++spki, socket);
-            //printf("ASN: %u, SKI:%u, SPKI:%u\n", asn, ski, spki);
-            assert(spki_table_add_entry(&spkit, record) == SPKI_SUCCESS);
-            memcpy(&(*records)[index], record, sizeof(*record));
-            free(record);
-            index++;
-        }
     }
-    //Shuffel the records, else the caching will influence the result
-    srand(time(NULL));
+
+    //Generated the duplicated records
+    for(unsigned int i = (number_of_records - number_of_duplicats); i < number_of_records; i++){
+        unsigned int record_index = rand()%(number_of_records-number_of_duplicats+1);
+        printf("Duplicate of %u created\n", record_index);
+        fflush(NULL);
+        record = create_record((*records)[record_index].asn, i, i, socket);
+
+        assert(spki_table_add_entry(&spkit, record) == SPKI_SUCCESS);
+        memcpy(&(*records)[i], record, sizeof(*record));
+        free(record);
+    }
+
+    //Shuffle the records
     for(unsigned int i = 0; i < number_of_records; i++){
         unsigned int rand1 = rand()%number_of_records;
         unsigned int rand2 = rand()%number_of_records;
-
         switch_records(&(*records)[rand1], &(*records)[rand2]);
     }
 }

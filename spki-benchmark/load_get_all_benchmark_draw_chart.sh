@@ -63,7 +63,7 @@ echo "Data" >> $log_tmp_dir/log
 
 #Run benchmark and save results
 for (( i = $start_value; i <= $stop_value; i=$[$i+$increment_value] )); do
-	cpu_time_in_s=$(./src/load_get_all_benchmark $i 5 $index | grep "Average" | cut -d ' ' -f 2)
+	cpu_time_in_s=$(./src/load_get_all_benchmark $i 5 0 | grep "Average" | cut -d ' ' -f 2)
     echo $cpu_time_in_s
 	echo "$i;$cpu_time_in_s" >> $log_tmp_dir/log
 done
