@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
     struct pstat start;
     struct pstat end;
 
-    unsigned int average_rss = 0;
+    unsigned long long int average_rss = 0;
     spki_test_data* test_data;
     for(unsigned int i = 0; i < passes; i++){
         struct spki_table spkit;
@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
         spki_table_free(&spkit);
     }
 
-    printf("\n\nAverage RSS\n%u Byte\n%u MiB\n", average_rss/passes, average_rss/(1024*1024)/passes);
+    printf("\n\nAverage RSS\n%llu Byte\n%llu MiB\n", average_rss/passes, average_rss/(1024*1024)/passes);
     spki_test_data_free(test_data);
     return 0;
 }

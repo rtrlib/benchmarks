@@ -6,7 +6,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99 -Wall -g -Wextra -Wformat-securit
 include_directories(.)
 include_directories(/home/nils/git/rtrlib)
 
-find_library(RTR_LIB rtr PATHS /home/nils/git/rtrlib)
+find_library(RTR_LIB rtr PATHS /home/nils/git/rtrlib/build)
 find_package(Threads REQUIRED)
 
 ADD_SUBDIRECTORY(pfx-benchmark)
