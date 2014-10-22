@@ -29,6 +29,13 @@ add_custom_target(
 	DEPENDS load_get_all_benchmark
 )
 
+# Load get_all indirection
+add_custom_target(
+	run_spki_load_get_all_collision_chain_benchmark
+	COMMAND cd .. && ./load_get_all_collision_chain_benchmark_draw_chart.sh 0 1000 250
+	DEPENDS load_get_all_collision_chain_benchmark
+)
+
 # Run all SPKI benchmarks
 add_custom_target(
 	run_all_spki_benchmarks
