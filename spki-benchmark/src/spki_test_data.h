@@ -55,11 +55,11 @@ spki_test_data* spki_test_data_add_duplicated_records(spki_test_data* data, unsi
  * @brief Shuffle the records in the given spki_test_data object.
  * @param data
  */
-void spki_test_data_shuffle(spki_test_data* data);
+spki_test_data* spki_test_data_shuffle(spki_test_data* data);
 
 /**
  * @brief Append records from src to dest.
  * @param src
  * @param dest
  */
-void spki_test_data_concatenate(spki_test_data* src, spki_test_data* dest);
+spki_test_data* spki_test_data_concatenate(spki_test_data* src, spki_test_data* dest);

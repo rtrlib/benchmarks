@@ -141,7 +141,18 @@ spki_test_data* spki_test_data_duplicate_random_records(spki_test_data* data,
 }
 
 
-void spki_test_data_shuffle(spki_test_data* data);
+spki_test_data* spki_test_data_shuffle(spki_test_data* data){
+    srand(time(NULL));
+
+    struct spki_record record;
+    for(unsigned int i = 0; i < data->size; i++){
+        memcpy(&record, &data->records[i], sizeof(record));
+        struct spki_record* swap_record = &data->records[rand()%data->size];
+        memcpy(&data->records[i], swap_record, sizeof(*data->records));
+        memcpy(swap_record, &record, sizeof(*swap_record));
+    }
+    return data;
+}
 
 
-void spki_test_data_concatenate(spki_test_data* src, spki_test_data* dest);
+spki_test_data* spki_test_data_concatenate(spki_test_data* src, spki_test_data* dest);
