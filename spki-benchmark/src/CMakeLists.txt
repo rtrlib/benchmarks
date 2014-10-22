@@ -1,7 +1,7 @@
 add_executable(load_add_entry_benchmark load_add_entry_benchmark.c)
 target_link_libraries(load_add_entry_benchmark ${RTR_LIB} ${CMAKE_THREAD_LIBS_INIT})
 
-add_executable(load_get_all_benchmark load_get_all_benchmark.c)
+add_executable(load_get_all_benchmark load_get_all_benchmark.c spki_test_data.c)
 target_link_libraries(load_get_all_benchmark ${RTR_LIB} ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(memory_benchmark memory_benchmark.c spki_test_data.c)
