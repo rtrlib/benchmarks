@@ -58,6 +58,7 @@ int main(int argc, char* argv[])
         printf("Number of duplicates: %u\n", (int)(num_of_records_to_create *
                                               (chance_duplicated_asn / 100)));
 
+        test_data = spki_test_data_shuffle(test_data);
         records = spki_test_data_get_records(test_data);
 
         for(unsigned int i = 0; i < spki_test_data_size(test_data); i++){

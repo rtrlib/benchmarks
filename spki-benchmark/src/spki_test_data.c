@@ -82,7 +82,7 @@ spki_test_data* spki_test_data_add_records(spki_test_data* data, unsigned int nu
     if(data == NULL){
         printf("realloc error\n");
         free(tmp);
-        return;
+        return NULL;
     }
 
     for(unsigned int i = data->size; i < data->size + number_of_records; i++){
@@ -101,7 +101,7 @@ spki_test_data* spki_test_data_add_duplicated_records(spki_test_data* data, unsi
     if(data == NULL){
         printf("realloc error\n");
         free(tmp);
-        return;
+        return NULL;
     }
 
     for(unsigned int i = data->size; i < data->size + number_of_duplicates; i++){
