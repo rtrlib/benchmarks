@@ -42,7 +42,7 @@ do
 	values=""
 	for (( i = $start_value; i <= $stop_value; i=$[$i+$increment_value] )); do
 		#Start benchmark -> add $i records and repeat the measurment 5 times
-		cpu_time_in_s=$(./src/load_get_all_benchmark $i 5 $index | grep "Average" | cut -d ' ' -f 2)
+		cpu_time_in_s=$(./src/load_get_all_benchmark $i 5 $index | egrep "Average .* seconds" | cut -d ' ' -f 2)
 		echo $cpu_time_in_s
 		values="${values};${cpu_time_in_s}"
 	done
@@ -63,7 +63,7 @@ echo "Data" >> $log_tmp_dir/log
 
 #Run benchmark and save results
 for (( i = $start_value; i <= $stop_value; i=$[$i+$increment_value] )); do
-	cpu_time_in_s=$(./src/load_get_all_benchmark $i 5 0 | grep "Average" | cut -d ' ' -f 2)
+	cpu_time_in_s=$(./src/load_get_all_benchmark $i 5 0 | egrep "Average .* seconds" | cut -d ' ' -f 2)
     echo $cpu_time_in_s
 	echo "$i;$cpu_time_in_s" >> $log_tmp_dir/log
 done

@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
         spki_table_free(&spkit);
         spki_test_data_free(test_data);
     }
-    printf("Average %.6f s\n", average_usecs/(double)passes/(1000.0*1000.0));
-    printf("Average %.6f µs\n", average_usecs/(double)passes);
+    printf("Average %.6f seconds\n", average_usecs/(double)passes/(1000.0*1000.0));
+    printf("Average %.6f microseconds\n", average_usecs/(double)passes);
     return 0;
 }
