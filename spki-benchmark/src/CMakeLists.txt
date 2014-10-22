@@ -39,5 +39,5 @@ add_custom_target(
 # Run all SPKI benchmarks
 add_custom_target(
 	run_all_spki_benchmarks
-	DEPENDS run_spki_load_add_entry_benchmark run_spki_memory_benchmark run_spki_load_get_all_benchmark
+	DEPENDS run_spki_load_add_entry_benchmark run_spki_memory_benchmark run_spki_load_get_all_benchmark run_spki_load_get_all_collision_chain_benchmark
 )
