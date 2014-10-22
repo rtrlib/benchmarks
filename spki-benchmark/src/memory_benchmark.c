@@ -8,24 +8,7 @@
 #include "util/getusage.c"
 #include <signal.h>
 #include <sys/time.h>
-
-
-
-static struct spki_record* create_record(int ASN, int ski_offset, int spki_offset, struct rtr_socket *socket) {
-    struct spki_record *record = malloc(sizeof(struct spki_record));
-    record->asn = ASN;
-    uint32_t i;
-
-    for(i = 0; i < sizeof(record->ski); i++){
-        record->ski[i] = i + ski_offset;
-    }
-
-    for(i = 0; i < sizeof(record->spki); i++){
-        record->spki[i] = i + spki_offset;
-    }
-    record->socket = socket;
-    return record;
-}
+#include "spki_test_data.h"
 
 unsigned int get_timediff(const struct timeval start,
         const struct timeval end) {
@@ -36,27 +19,6 @@ unsigned int get_timediff(const struct timeval start,
 void sig_handler(){
     fprintf(stderr, "FLUSHING\n");
     fflush(NULL);
-
-}
-
-void generate_spki_records(struct spki_record **records, unsigned int num_of_records){
-    *records = malloc(num_of_records * sizeof(struct spki_record));
-    if(*records == NULL){
-        printf("malloc error\n");
-        exit(EXIT_FAILURE);
-    }
-
-    srand (time(NULL));
-    //Create i SPKI records with different ASN but sometimes same SKI/SPKI
-    for(unsigned int i = 0; i < num_of_records; i++){
-        int ski = rand() % (num_of_records/2);
-        int spki = rand() % (num_of_records/2);
-        struct rtr_socket* socket = (struct rtr_socket*) 0x13;
-        struct spki_record* record = create_record(i,ski, spki, socket);
-
-        memcpy(&(*records)[i], record, sizeof(struct spki_record));
-        free(record);
-    }
 }
 
 int main(int argc, char* argv[])
@@ -74,19 +36,21 @@ int main(int argc, char* argv[])
     struct pstat start;
     struct pstat end;
 
-    struct spki_record* records;
-
     unsigned int average_rss = 0;
+    spki_test_data* test_data;
     for(unsigned int i = 0; i < passes; i++){
         struct spki_table spkit;
         spki_table_init(&spkit, NULL);
-        generate_spki_records(&records, num_of_records_to_create);
+
+        struct spki_record* records;
+        test_data = spki_test_data_new();
+        test_data = spki_test_data_add_records(test_data, num_of_records_to_create);
+        records = spki_test_data_get_records(test_data);
 
         printf("Start measurement... Pass %u\n", i);
-
         if(get_usage(pid, &start) == -1){
             fprintf(stderr, "GET USAGE ERROR\n");
-            free(records);
+            spki_test_data_free(test_data);
             spki_table_free(&spkit);
             exit(EXIT_FAILURE);
         }
@@ -94,7 +58,7 @@ int main(int argc, char* argv[])
         for(unsigned int i = 0; i < num_of_records_to_create; i++){
             if(spki_table_add_entry(&spkit, &records[i]) == SPKI_ERROR){
                 printf("Error while adding record %u\n", i);
-                free(records);
+                spki_test_data_free(test_data);
                 spki_table_free(&spkit);
                 exit(EXIT_FAILURE);
             }
@@ -102,7 +66,7 @@ int main(int argc, char* argv[])
 
         if(get_usage(pid, &end) == -1){
             fprintf(stderr, "GET USAGE ERROR\n");
-            free(records);
+            spki_test_data_free(test_data);
             spki_table_free(&spkit);
             exit(EXIT_FAILURE);
         }
@@ -113,6 +77,6 @@ int main(int argc, char* argv[])
     }
 
     printf("\n\nAverage RSS\n%u Byte\n%u MiB\n", average_rss/passes, average_rss/(1024*1024)/passes);
-    free(records);
+    spki_test_data_free(test_data);
     return 0;
 }
