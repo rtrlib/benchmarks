@@ -1,3 +1,5 @@
+#!/bin/bash
+
 log_tmp_dir=tmp
 benchmark_result_dir=$(pwd)/result
 
