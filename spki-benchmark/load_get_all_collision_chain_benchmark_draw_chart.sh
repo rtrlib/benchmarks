@@ -28,6 +28,6 @@ for (( i = $start_value; i <= $stop_value; i=$[$i+$increment_value] )); do
 done
 
 #Generate graph
-./generate-line-chart.py "CPU time consumption of load_get_all_benchmark()" $log_tmp_dir/log $benchmark_result_dir/CPU_time_load_get_all_collision_chain_benchmark_line_chart.pdf
+./generate-line-chart.py "CPU time consumption of load_get_all_benchmark()" $log_tmp_dir/log $benchmark_result_dir/CPU_time_load_get_all_collision_chain_benchmark_$(start_value)_$(stop_value)_$(increment_value)_line_chart.pdf
 echo ""
 echo "Benchmark result is in ${benchmark_result_dir}/"
