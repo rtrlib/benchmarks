@@ -38,14 +38,14 @@ int main(int argc, char* argv[])
 
     unsigned long long int average_rss = 0;
     spki_test_data* test_data;
+
+    struct spki_record* records;
+    test_data = spki_test_data_new();
+    test_data = spki_test_data_add_records(test_data, num_of_records_to_create);
+    records = spki_test_data_get_records(test_data);
     for(unsigned int i = 0; i < passes; i++){
         struct spki_table spkit;
         spki_table_init(&spkit, NULL);
-
-        struct spki_record* records;
-        test_data = spki_test_data_new();
-        test_data = spki_test_data_add_records(test_data, num_of_records_to_create);
-        records = spki_test_data_get_records(test_data);
 
         printf("Start measurement... Pass %u\n", i);
         if(get_usage(pid, &start) == -1){
