@@ -68,10 +68,8 @@ while line != "":
     set_name = line = infile.readline()
     plt.xlim(minxval)
 
-    plt.plot(setx, sety, label=set_name)
-    set_name = line = infile.readline()
 
 plt.margins(0.1)
 plt.grid()
-plt.legend()
+plt.legend(loc=2)
 plt.savefig(sys.argv[len(sys.argv) - 1], dpi=1000, figsize=(2, 2))
