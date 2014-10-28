@@ -40,16 +40,17 @@ int main(int argc, char* argv[])
     long unsigned int scpu_usage;
 
     double average_usecs = 0;
-    for(unsigned int i = 0; i < passes; i++){
-        struct spki_table spkit;
-        spki_test_data* test_data;
-        struct spki_record* records;
-        spki_table_init(&spkit, NULL);
 
-        printf("Generate records...\n");
-        test_data = spki_test_data_new();
-        test_data = spki_test_data_add_records(test_data, num_of_records_to_create);
-        records = spki_test_data_get_records(test_data);
+    struct spki_table spkit;
+    spki_test_data* test_data;
+    struct spki_record* records;
+
+    test_data = spki_test_data_new();
+    test_data = spki_test_data_add_records(test_data, num_of_records_to_create);
+    records = spki_test_data_get_records(test_data);
+
+    for(unsigned int i = 0; i < passes; i++){
+        spki_table_init(&spkit, NULL);
 
         printf("Start measurement... Pass %u\n", i);
 
@@ -81,9 +82,9 @@ int main(int argc, char* argv[])
         printf("usecs: %u\n\n", get_timediff(stime, etime));
         average_usecs += get_timediff(stime, etime);
         spki_table_free(&spkit);
-        spki_test_data_free(test_data);
     }
 
+    spki_test_data_free(test_data);
     printf("Average %.6f s\n", average_usecs/(double)passes/(1000.0*1000.0));
     return 0;
 }
