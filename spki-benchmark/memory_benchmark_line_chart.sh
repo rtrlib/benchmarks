@@ -19,7 +19,7 @@ mkdir -p $log_dir
 mkdir -p $benchmark_result_dir
 
 #Add captions [x-axis/y-axis]
-echo "Number of added records;Memory usage in MiB" > $log_file
+echo "Number of records;Memory usage in MiB" > $log_file
 echo "Data" >> $log_file
 
 #Run benchmark and save results

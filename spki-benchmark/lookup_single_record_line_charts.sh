@@ -18,7 +18,7 @@ mkdir -p $log_dir
 mkdir -p $benchmark_result_dir
 
 #Chart 1. Measure how long it takes to lookup one record in a SPKI table which contains X records.
-echo "Number of records;Average CPU time consumption in µs to lookup one record" > $log_file
+echo "Number of records;Average CPU time consumption in µs to look up one record" > $log_file
 echo "Data" >> $log_file
 
 #Run benchmark and save results
@@ -30,6 +30,6 @@ for (( i = $start_value; i <= $stop_value; i=$[$i+$increment_value] )); do
 done
 
 #Generate graph
-./generate-line-chart.py "CPU time consumption of load_get_all_benchmark()" $log_file $benchmark_result_dir/$benchmark_name.pdf
+./generate-line-chart.py "CPU time consumption: Single record look up" $log_file $benchmark_result_dir/$benchmark_name.pdf
 echo ""
 echo "Benchmark result is in ${benchmark_result_dir}/"

@@ -52,5 +52,5 @@ do
 done
 
 #Generate graph
-./generate-bar-chart.py "CPU time consumption of spki_table_get_all()" $log_file $benchmark_result_dir/$benchmark_name.pdf
+./generate-bar-chart.py "CPU time consumption: Bulk look up with collisions" $log_file $benchmark_result_dir/$benchmark_name.pdf
 echo "Benchmark result is in ${benchmark_result_dir}/"
