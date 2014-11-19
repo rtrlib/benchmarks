@@ -71,5 +71,5 @@ while line != "":
 
 plt.margins(0.1)
 plt.grid()
-plt.legend(loc=2)
+#plt.legend(loc=2)
 plt.savefig(sys.argv[len(sys.argv) - 1], dpi=1000, figsize=(2, 2))
