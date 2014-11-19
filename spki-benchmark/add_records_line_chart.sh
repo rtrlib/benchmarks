@@ -36,7 +36,7 @@ for (( i = $start_value; i <= $stop_value; i=$[$i+$increment_value] )); do
 done
 
 #Generate graph
-./generate-line-chart.py "CPU time consumption of spki_table_add_entry()" $log_file $benchmark_result_dir/$benchmark_name.pdf
+./generate-line-chart.py "CPU time consumption: Add operation" $log_file $benchmark_result_dir/$benchmark_name.pdf
 echo ""
 echo "Add record benchmark result is in ${benchmark_result_dir}/"
 

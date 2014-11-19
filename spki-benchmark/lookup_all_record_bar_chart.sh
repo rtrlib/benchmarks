@@ -32,13 +32,13 @@ echo $group_names >> $log_file
 
 #Add bar names for the legend
 bar_names=""
-for index in 0 1 3 5 10 50 80
+for index in 0 2 4 8 16 32
 do
     bar_names=$bar_names";Hash collision chance ${index}%"
 done
 echo ${bar_names:1} >> $log_file
 
-for index in 0 1 3 5 10 50 80 
+for index in 0 2 4 8 16 32 
 do
     values=""
     for (( i = $start_value; i <= $stop_value; i=$[$i+$increment_value] )); do

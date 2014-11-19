@@ -25,14 +25,14 @@ add_custom_target(
 # Load get_all target
 add_custom_target(
 	run_spki_lookup_all_benchmark
-	COMMAND cd .. && ./lookup_all_records_line_chart.sh 0 2000000 100000 10
-	COMMAND cd .. && ./lookup_all_record_bar_chart.sh  0 1000000 200000 5
+	COMMAND cd .. && ./lookup_all_records_line_chart.sh 0 2000000 250000 20
+	COMMAND cd .. && ./lookup_all_record_bar_chart.sh  200000 1000000 200000 5
 	DEPENDS load_get_all_benchmark
 )
 
 add_custom_target(
 	run_spki_get_singel_record_benchmark
-	COMMAND cd .. && ./lookup_single_record_line_charts.sh 0 2000000 10000 20
+	COMMAND cd .. && ./lookup_single_record_line_charts.sh 0 2000000 100000 15
 	DEPENDS load_get_all_benchmark
 )
 
